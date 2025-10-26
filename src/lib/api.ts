@@ -187,9 +187,65 @@ class ApiClient {
     return response.json();
   }
 
+  async getCurrentUser(): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/user/settings`, {
+      headers: this.getHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch user');
+    }
+    
+    const data = await response.json();
+    return { username: data.username || 'User' };
+  }
+
+  async deleteLastMessage(botId: number) {
+    const response = await fetch(`${API_BASE_URL}/chat/${botId}/last_message`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.msg || 'Failed to delete last message');
+    }
+    
+    return response.json();
+  }
+
+  async deleteBot(botId: number) {
+    const response = await fetch(`${API_BASE_URL}/bots/${botId}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.msg || 'Failed to delete bot');
+    }
+    
+    return response.json();
+  }
+
+  async updateBot(botId: number, formData: FormData) {
+    const response = await fetch(`${API_BASE_URL}/bots/${botId}`, {
+      method: 'PUT',
+      headers: this.getHeaders(true),
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.msg || 'Failed to update bot');
+    }
+    
+    return response.json();
+  }
+
   getBotImageUrl(filename?: string): string {
     if (!filename) return '/placeholder.svg';
-    return `${API_BASE_URL}/uploads/${filename}`;
+    return `${API_BASE_URL}/uploads/bots/${filename}`;
   }
 }
 

@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import CreateBot from "./pages/CreateBot";
+import EditBot from "./pages/EditBot";
 import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
             <Route path="/create-bot" element={<ProtectedRoute><CreateBot /></ProtectedRoute>} />
+            <Route path="/edit-bot/:botId" element={<ProtectedRoute><EditBot /></ProtectedRoute>} />
             <Route path="/chat/:botId" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

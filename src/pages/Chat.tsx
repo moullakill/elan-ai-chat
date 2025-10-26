@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { apiClient, Message } from '@/lib/api';
 import { toast } from 'sonner';
-import { Send, Trash2 } from 'lucide-react';
+import { Send, Undo2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function Chat() {
@@ -42,11 +42,11 @@ export default function Chat() {
     },
   });
 
-  const deleteMessageMutation = useMutation({
-    mutationFn: (messageId: number) => apiClient.deleteMessage(messageId),
+  const deleteLastMessageMutation = useMutation({
+    mutationFn: (botId: number) => apiClient.deleteLastMessage(botId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chatHistory', botId] });
-      toast.success('Message supprimé');
+      toast.success('Dernier échange supprimé');
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : 'Erreur lors de la suppression');
@@ -61,9 +61,9 @@ export default function Chat() {
     setInputMessage('');
   };
 
-  const handleDelete = (messageId?: number) => {
-    if (!messageId) return;
-    deleteMessageMutation.mutate(messageId);
+  const handleDeleteLast = () => {
+    if (!botId || messages.length === 0) return;
+    deleteLastMessageMutation.mutate(Number(botId));
   };
 
   useEffect(() => {
@@ -120,24 +120,13 @@ export default function Chat() {
                 )}
                 
                 <div
-                  className={`group relative max-w-[70%] rounded-2xl px-4 py-3 ${
+                  className={`max-w-[70%] rounded-2xl px-4 py-3 ${
                     message.sender === 'user'
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-card border border-border'
                   }`}
                 >
                   <p className="whitespace-pre-wrap break-words">{message.content}</p>
-                  
-                  {message.id && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => handleDelete(message.id)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  )}
                 </div>
 
                 {message.sender === 'user' && (
@@ -170,6 +159,17 @@ export default function Chat() {
       <div className="border-t border-border bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 max-w-4xl">
           <div className="flex gap-2">
+            {messages.length > 0 && (
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={handleDeleteLast}
+                disabled={isThinking}
+                title="Supprimer le dernier échange"
+              >
+                <Undo2 className="h-4 w-4" />
+              </Button>
+            )}
             <Input
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
