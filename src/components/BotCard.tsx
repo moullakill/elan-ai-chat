@@ -29,7 +29,7 @@ export function BotCard({ bot }: BotCardProps) {
     >
       <div className="aspect-[3/4] relative overflow-hidden bg-muted">
         <img
-          src={apiClient.getBotImageUrl(bot.image_filename)}
+          src={bot.image_url || '/placeholder.svg'}
           alt={bot.name}
           className="w-full h-full object-cover"
         />

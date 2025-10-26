@@ -12,6 +12,7 @@ export interface Bot {
   ollama_model: string;
   is_public: boolean;
   image_filename?: string;
+  image_url?: string;
   creator_id: number;
 }
 

@@ -43,8 +43,8 @@ export default function EditBot() {
         ollama_model: bot.ollama_model,
         is_public: bot.is_public,
       });
-      if (bot.image_filename) {
-        setImagePreview(apiClient.getBotImageUrl(bot.image_filename));
+      if (bot.image_url) {
+        setImagePreview(bot.image_url);
       }
     }
   }, [bot]);
