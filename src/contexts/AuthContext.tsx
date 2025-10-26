@@ -26,11 +26,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    setIsAuthenticated(!!token);
-    if (token) {
-      refreshUser();
-    }
+    const checkAuth = async () => {
+      const token = localStorage.getItem('access_token');
+      setIsAuthenticated(!!token);
+      if (token) {
+        await refreshUser();
+      }
+    };
+    checkAuth();
   }, []);
 
   const login = async (username: string, password: string) => {
