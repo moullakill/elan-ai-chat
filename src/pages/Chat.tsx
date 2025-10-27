@@ -32,12 +32,30 @@ export default function Chat() {
   const sendMessageMutation = useMutation({
     mutationFn: ({ botId, message }: { botId: number; message: string }) =>
       apiClient.sendMessage(botId, message),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chatHistory', botId] });
+    onMutate: async ({ message }) => {
+      // Add user message optimistically
+      const newMessage: Message = {
+        sender: 'user',
+        content: message,
+        timestamp: new Date().toISOString(),
+      };
+      
+      queryClient.setQueryData(['chatHistory', botId], (old: Message[] = []) => [...old, newMessage]);
+    },
+    onSuccess: (data) => {
+      // Add bot response
+      const botMessage: Message = {
+        sender: 'bot',
+        content: data.response,
+        timestamp: new Date().toISOString(),
+      };
+      
+      queryClient.setQueryData(['chatHistory', botId], (old: Message[] = []) => [...old, botMessage]);
       setIsThinking(false);
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : 'Erreur lors de l\'envoi du message');
+      queryClient.invalidateQueries({ queryKey: ['chatHistory', botId] });
       setIsThinking(false);
     },
   });
@@ -90,7 +108,7 @@ export default function Chat() {
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12">
-                <AvatarImage src={apiClient.getBotImageUrl(bot.image_filename)} />
+                <AvatarImage src={bot.image_url || '/placeholder.svg'} />
                 <AvatarFallback>{bot.name[0]}</AvatarFallback>
               </Avatar>
               <div>
@@ -114,7 +132,7 @@ export default function Chat() {
               >
                 {message.sender === 'bot' && bot && (
                   <Avatar className="h-10 w-10 flex-shrink-0">
-                    <AvatarImage src={apiClient.getBotImageUrl(bot.image_filename)} />
+                    <AvatarImage src={bot.image_url || '/placeholder.svg'} />
                     <AvatarFallback>{bot.name[0]}</AvatarFallback>
                   </Avatar>
                 )}
@@ -141,7 +159,7 @@ export default function Chat() {
               <div className="flex gap-3">
                 {bot && (
                   <Avatar className="h-10 w-10 flex-shrink-0">
-                    <AvatarImage src={apiClient.getBotImageUrl(bot.image_filename)} />
+                    <AvatarImage src={bot.image_url || '/placeholder.svg'} />
                     <AvatarFallback>{bot.name[0]}</AvatarFallback>
                   </Avatar>
                 )}
